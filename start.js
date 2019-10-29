@@ -22,7 +22,7 @@ if (cluster.isMaster) {
 } else {
   // require('./app')();
   const app    = express();
-  const  routes = require( './routes' )( app );
+  const  routes = require( './routes/auth' )( app );
 
   app
     .use( express.bodyParser() )

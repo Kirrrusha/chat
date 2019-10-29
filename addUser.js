@@ -10,8 +10,8 @@ const readline = require('readline');
 const rl = readline.createInterface({input: process.stdin, output: process.stdout});
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb+srv://kirrrusha:K14Eh1LQL@cluster0-frxpn.mongodb.net/test?retryWrites=true&w=majority', {useMongoClient: true});
-
+const url = 'mongodb://localhost:27017';
+mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 
 //логин и пароль, изначально пустые
 let login = '',

@@ -1,14 +1,31 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const jwt = require("jwt-simple");
+const jwt = require('jwt-simple');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const passport = require('passport');
 const config = require('./config/config');
+const routerUser = require('./routes/user')
 
+const PORT = process.env.PORT || 3000;
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://kirrrusha:K14Eh1LQL@cluster0-frxpn.mongodb.net/test?retryWrites=true&w=majority/chat', {useMongoClient: true});
+
+async function start() {
+  try {
+    // const url = 'mongodb+srv://kirrrusha:K14Eh1LQL@cluster0-frxpn.mongodb.net/test?retryWrites=true&w=majority';
+    const url = 'mongodb://localhost:27017';
+    await mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}. Use our API`);
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+start();
+
 require('./models/user');
 
 const app = express();
@@ -32,28 +49,8 @@ require('./config/config-passport');
 app.use(passport.initialize({userProperty: 'payload'}));
 app.use(passport.session());
 
-app.post('/token', function (req, res, next) {
-  passport.authenticate('loginUsers', (err, user) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.json({status: 'Укажите правильный логин и пароль!'});
-    }
-    req
-      .logIn(user, function (err) {
-        if (err) {
-          return next(err);
-        }
-        const payload = {
-          id: user.id
-        };
-        const token = jwt.encode(payload, config.secret); // line 10 passport-config
-        res.json({token: token});
-      });
-  })(req, res, next);
-});
 
+app.use('/api/', routerUser);
 
 // app.use((req, res, next) => {
 //   if (cluster.isWorker) {
@@ -76,6 +73,3 @@ app.use((err, req, res, next) => {
     .json({err: '500'});
 })
 
-app.listen(3000, function () {
-  console.log('Server running. Use our API');
-})
