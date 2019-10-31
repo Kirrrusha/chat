@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bCrypt = require('bcrypt-nodejs');const passport = require('passport');
+const bCrypt = require('bcrypt');const passport = require('passport');
 const uuidv4 = require('uuid/v4');
 const User = require('../models/user');
 const loginToken = require('../models/loginToken');
@@ -7,6 +7,7 @@ const loginToken = require('../models/loginToken');
 // const loginToken = mongoose.model('loginToken');
 const setCookie = require('../lib/setcookie');
 const jwt = require('jwt-simple');
+const config = require('../config/config');
 
 module.exports.saveNewUser = (req, res) => {
   User.findOne({ login: req.body.username })
@@ -75,10 +76,8 @@ module.exports.deleteUser = (req, res) => {};
 module.exports.saveUserImage = (req, res) => {};
 module.exports.getUsers = (req, res) => {};
 module.exports.updateUserPermission = (req, res) => {};
-module.exports.authFromToken = (req, res) => {
+module.exports.authFromToken = (req, res, next) => {
   passport.authenticate('loginUsers', (err, user) => {
-    console.log(err)
-    console.log(user)
     if (err) {
       return next(err);
     }
