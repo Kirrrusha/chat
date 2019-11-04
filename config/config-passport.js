@@ -5,29 +5,24 @@ const mongoose = require('mongoose');
 const User = mongoose.model('login');
 const config = require('./config');
 const ExtractJwt = passportJWT.ExtractJwt;
-const Strategy = passportJWT.Strategy;
+const JwtStrategy = passportJWT.Strategy;
 
 const params = {
   secretOrKey: config.secret,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
 };
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
+passport.serializeUser((user, done) => done(null, user.id));
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
+passport.deserializeUser((id, done) =>
+  User.findById(id, (err, user) => done(err, user)));
 
 passport.use(
   'loginUsers',
   new LocalStrategy((username, password, done) => {
-    User.findOne({ login: username })
+    User.findOne({login: username})
       .then(user => {
-        if (user.validPassword(password)) {
+        if (!user || user.validPassword(password)) {
           return done(null, user);
         } else {
           return done(null, false);
@@ -40,8 +35,8 @@ passport.use(
   })
 );
 
-const strategy = new Strategy(params, function(payload, done) {
-  const User = mongoose.model('login');
+const strategy = new JwtStrategy(params, function(payload, done) {
+  console.log('payload JWT', payload)
   User.find({ id: payload.id })
     .then(user => {
       if (user) {

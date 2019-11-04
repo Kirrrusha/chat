@@ -8,9 +8,15 @@ const UserSchema = new Schema({
     required: [true, 'Enter login']
   },
   email: {
-    type: String
+    type: String,
+    required: [true, 'Enter email']
   },
-  hash: String
+  hash: String,
+}, {
+  timestamps: {
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  }
 });
 
 UserSchema.methods.setPassword = (password) => {
@@ -21,4 +27,8 @@ UserSchema.methods.validPassword = function(password) {
   return bCrypt.compareSync(password, this.hash)
 };
 
-mongoose.model('login', UserSchema);
+const login = mongoose.model('login', UserSchema);
+
+module.exports = ({
+  login
+});
