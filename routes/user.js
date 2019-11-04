@@ -11,9 +11,9 @@ router.post('/authFromToken', ctrlUser.authFromToken);
 
 router.post('/login', ctrlUser.login);
 
-router.post('/logOut', ctrlUser.logOut);
+router.post('/saveNewUser', ctrlUser.saveNewUser);
 
-router.post('/saveNewUser', auth, ctrlUser.saveNewUser);
+router.post('/logOut', auth, ctrlUser.logOut);
 
 router.put('/updateUser/:id', auth, ctrlUser.updateUser);
 
