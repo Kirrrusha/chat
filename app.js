@@ -6,7 +6,8 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const passport = require('passport');
 const config = require('./config/config');
-const routerUser = require('./routes/user')
+const routerUser = require('./routes/user');
+const fileUpload = require('express-fileupload');
 
 const PORT = process.env.PORT || 3000;
 mongoose.Promise = global.Promise;
@@ -29,6 +30,11 @@ start();
 require('./models/user');
 
 const app = express();
+
+
+app.use(fileUpload({
+  createParentPath: true
+}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
