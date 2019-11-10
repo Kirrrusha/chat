@@ -17,7 +17,7 @@ router.post('/logOut', auth, ctrlUser.logOut);
 
 router.put('/updateUser/:id', auth, ctrlUser.updateUser);
 
-router.delete('/updateUser/:id', auth, ctrlUser.deleteUser);
+router.delete('/deleteUser/:id', auth, ctrlUser.deleteUser);
 
 router.post('/saveUserImage/:id', auth, ctrlUser.saveUserImage);
 

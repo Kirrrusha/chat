@@ -10,6 +10,7 @@ const UserModel = mongoose.model('login');
 const setCookie = require('../lib/setcookie');
 const jwt = require('jwt-simple');
 const config = require('../config/config');
+const fs = require('fs');
 
 module.exports.saveNewUser = (req, res, next) => {
   passport.authenticate('loginUsers', (err, user) => {
@@ -22,6 +23,9 @@ module.exports.saveNewUser = (req, res, next) => {
       newUser.login = req.body.username;
       newUser.hash = createHash(req.body.password);
       newUser.email = req.body.email;
+      newUser.surname = req.body.surname;
+      newUser.name = req.body.name;
+      newUser.patronymic = req.body.patronymic;
       newUser
         .save()
         .then(user => {
@@ -53,21 +57,56 @@ module.exports.login = (req, res, next) => {
       const payload = {
         id: user.id
       };
-      const token = jwt.encode(payload, config.secret);
+
       res.json({
+        id: user._id,
         username: user.login,
         password: user.hash,
-        token: token
+        surname: user.surname,
+        name: user.name,
+        patronymic: user.patronymic,
+        token: createToken(payload)
       });
-
     });
   })(req, res, next);
 };
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
+  UserModel.updateOne({_id: req.params.id}, {email: req.body.email}, {upsert: true}, (err) => {
+    if (!err) {
+      return res
+        .json({
+          ...req.body
+        });
+    } else {
+      next(err);
+    }
+  });
 };
-module.exports.deleteUser = (req, res) => {
+module.exports.deleteUser = (req, res, next) => {
+  UserModel.remove({_id: req.params.id}, (err) => {
+    if (!err) {
+      return res
+        .json({
+          message: 'remove user'
+        });
+    } else {
+      next(err);
+    }
+  });
 };
-module.exports.saveUserImage = (req, res) => {
+module.exports.saveUserImage = (req, res, next) => {
+  UserModel.findOne({_id: req.params.id})
+    .then(user => {
+      if (user.img === './images/default.png') {
+        updateImage(req, user);
+      } else {
+        fs.unlink(`${user.img}`, (err) => {
+          if (err)
+            next(err);
+          updateImage(req, user);
+        });
+      }
+    });
 };
 module.exports.getUsers = (req, res) => {
 };
@@ -101,5 +140,16 @@ module.exports.logOut = (req, res) => {
 
 const createHash = (password) => bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 
-const createToken = (payload) => jwt.encode(payload, config.secret)
+const createToken = (payload) => jwt.encode(payload, config.secret);
+
+const updateImage = (req, user) => {
+  user.img = `./images/${req.files.userImage.name}`;
+  let image = req.files.userImage;
+  image.mv('./images/' + image.name);
+  user.save()
+    .then(newUser => {
+      return res
+        .json({path: `${newUser.img}`});
+    });
+};
 

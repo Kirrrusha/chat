@@ -11,7 +11,17 @@ const UserSchema = new Schema({
     type: String,
     required: [true, 'Enter email']
   },
-  hash: String,
+  hash: {
+    type: String,
+    required: [true, 'Enter password']
+  },
+  surname: String,
+  name: String,
+  patronymic: String,
+  img: {
+    type: String,
+    default: './images/default.png'
+  }
 }, {
   timestamps: {
     createdAt: 'createdAt',
@@ -23,8 +33,8 @@ UserSchema.methods.setPassword = (password) => {
   this.hash = bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 };
 
-UserSchema.methods.validPassword = function(password) {
-  return bCrypt.compareSync(password, this.hash)
+UserSchema.methods.validPassword = function (password) {
+  return bCrypt.compareSync(password, this.hash);
 };
 
 const login = mongoose.model('login', UserSchema);
